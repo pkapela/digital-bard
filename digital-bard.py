@@ -11,6 +11,7 @@
 import tkinter.filedialog
 import tkinter as tk
 import tkinter.ttk as tkk
+import nltk.sentiment.vader as vader
 import random
 import os
 
@@ -23,7 +24,7 @@ class DigitalBard:
         master.title("DigitalBard ver. 1.0.0")
         master.geometry("300x450")
         master.resizable(False, False)
-
+        
         self.__buildMenu(master)
         self.__buildLayout(master)
         self.db_access = db.DB()
@@ -86,7 +87,9 @@ class DigitalBard:
         navigationFrame = tk.Frame(master)
         navigationFrame.pack()
         composeBtn = tk.Button(navigationFrame, text="Compose", command=self.__composeEvent)
-        composeBtn.pack()
+        composeBtn.pack(side=tk.LEFT)
+        sentimentBtn = tk.Button(navigationFrame, text="Sentiment", command=self.__sentiment)
+        sentimentBtn.pack(side=tk.LEFT)
 
         return None
 
@@ -190,9 +193,27 @@ class DigitalBard:
     def __composeEvent(self):
 
         self.poemOutput.config(text=self.__poemBuilder())
-        
+        self.poemOutput.config(bg="#faefe5")
+
         return None
     
+    def __sentiment(self):
+        
+        sid = vader.SentimentIntensityAnalyzer()
+        score = sid.polarity_scores(self.poemOutput.cget("text"))['compound']
+        
+        if(score >= 0.4):
+            print(f"score:{score}, positive")
+            self.poemOutput.config(bg="#d9e7d9")
+        elif(score < 0.4 and score > -0.4):
+            print(f"score:{score}, neutral")
+            self.poemOutput.config(bg="#e6e6e6")
+        else:
+            print(f"score:{score}, negative")
+            self.poemOutput.config(bg="#fcddde")
+            
+        return None
+
     def __fileOpen(self):
         
         my_filetypes = [("text files", ".txt")]
